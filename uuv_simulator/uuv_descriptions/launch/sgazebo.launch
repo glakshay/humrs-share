@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+   </include>
+
+  <param name="robot_description" textfile="$(find uuv_descriptions)/robots/snake.urdf"/>
+  <node
+    name="spawn_model"
+    pkg="gazebo_ros"
+    type="spawn_model"
+    args="-file $(find uuv_descriptions)/robots/snake.urdf -urdf z 0.2 -P 1.5708 -model uuv_descriptions"
+    output="screen" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true">
+  </node>
+
+</launch>
+
+
+

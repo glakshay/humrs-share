@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="snake">
+  <!-- load macros for modules -->
+  <xacro:include filename="./module_common.xacro"/>
+  <xacro:include filename="./rotary_module.xacro"/>
+  <xacro:include filename="./buoyancy_module.xacro"/>
+  <xacro:include filename="./radial_thruster.xacro"/>
+  <xacro:include filename="./axial_thruster.xacro"/>
+  <xacro:include filename="./head.xacro"/>
+
+  <xacro:head_module module="head" child="radial1" output_offset="${PI/2}"/>
+  <xacro:radial_thruster module="radial1" child="rotary1" output_offset="${-PI/2}"/>
+  <xacro:rotary_module module="rotary1" child="rotary2" output_offset="${PI/2}"/>
+  <xacro:rotary_module module="rotary2" child="axial" output_offset="0"/>
+  <xacro:axial_thruster module="axial"/>
+</robot>

@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="ocean_box">
+    <static>true</static>
+    <link name="link">
+
+      <visual name="ground">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 -2.4 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>4 4 .2</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://Media/materials/scripts/sand.material</uri>
+            <name>UUVSimulator/SandAndStones</name>
+          </script>
+        </material>
+      </visual>
+
+      <collision name="ground">
+        <pose>0 0 -2.4 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>4 4 .2</size>
+          </box>
+        </geometry>
+      </collision>
+
+
+      <visual name="surface">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 0.5 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>4 4 .2</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://Media/materials/scripts/water.material</uri>
+            <name>UUVSimulator/StaticDeepWater</name>
+          </script>
+        </material>
+      </visual>
+
+
+      <visual name="north">
+        <cast_shadows>false</cast_shadows>
+        <pose>0 0 -1 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>4 4 3</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://Media/materials/scripts/water.material</uri>
+            <name>UUVSimulator/SeaWall</name>
+          </script>
+        </material>
+      </visual>
+
+    </link>
+  </model>
+</sdf>

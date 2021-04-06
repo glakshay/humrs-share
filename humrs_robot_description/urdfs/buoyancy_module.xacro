@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="mass" value=".67" />
+  <xacro:property name="buoyancy_length" value="0.047941" />
+  <xacro:property name="buoyancy_radius" value="0.0257805" />
+
+  <xacro:macro name="buoyancy_body" params="module">
+    <link name="${module}__INPUT_INTERFACE">
+      <visual>
+        <origin xyz="0 0 ${-buoyancy_length / 2.0}" rpy="0 ${-PI/2} 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/buoyancy_body.stl"/>
+        </geometry>
+        <xacro:gray_material/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-buoyancy_length / 2.0}" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="${buoyancy_radius}" length="${buoyancy_length}" />
+        </geometry>
+      </collision> 
+      <inertial>
+        <origin xyz="0 0 ${-buoyancy_length / 2.0}" rpy="0 0 0" />
+        <mass value="${mass}"/>
+        <inertia ixx="${mass / 12.0 * (3 * buoyancy_radius**2 + buoyancy_length**2)}" iyy="${mass / 12.0 * (3 * buoyancy_radius**2 + buoyancy_length**2)}" izz="${mass / 2.0 * buoyancy_radius**2}" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="buoyancy_collar" params="module">
+    <link name="${module}__COLLAR">
+      <visual>
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/collar.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__COLLAR_JOINT" type="fixed">
+      <origin xyz="0 0 ${-buoyancy_length}" rpy="0 ${-PI/2} 0" />
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${module}__COLLAR"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="buoyancy_module_out_interface" params="module child offset">
+    <joint name="${module}__OUTPUT_INTERFACE" type="fixed">
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${child}__INPUT_INTERFACE"/>
+      <origin xyz="0 0 ${-buoyancy_length}" rpy="0 0 ${offset}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="buoyancy_module" params="module child output_offset">
+    <xacro:buoyancy_body module="${module}"/>
+    <xacro:buoyancy_collar module="${module}"/>
+    <xacro:buoyancy_module_out_interface module="${module}" child="${child}" offset="${output_offset}"/>
+  </xacro:macro>
+</robot>
+
+

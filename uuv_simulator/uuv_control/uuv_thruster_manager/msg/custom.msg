@@ -1,0 +1,5 @@
+geometry_msgs/Pose thruster1_pose
+geometry_msgs/Pose thruster2_pose
+geometry_msgs/Pose thruster3_pose
+geometry_msgs/Pose thruster4_pose
+geometry_msgs/Pose thruster5_pose

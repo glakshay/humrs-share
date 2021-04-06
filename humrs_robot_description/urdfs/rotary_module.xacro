@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="rotary_mass_2" value=".335" />
+  <xacro:property name="male_length_visual" value="0.037465" />
+  <xacro:property name="male_r" value="0.0254" />
+  <xacro:property name="input_to_joint" value="0.0273" />
+  <xacro:property name="joint_to_output" value="0.0352988" />
+  <xacro:property name="female_length" value="0.053107" />
+  <xacro:property name="female_r" value="0.0257805" />
+  <xacro:property name="male_length" value="${(input_to_joint - female_r) / 2.0}" />
+  <xacro:property name="joint_to_female_center" value="0.0087453"/>
+
+  <xacro:macro name="rotary_module_in" params="module">
+    <link name="${module}__INPUT_INTERFACE">
+      <visual>
+        <origin xyz="0 0 ${-male_length_visual / 2.0}" rpy="0 ${-PI/2} 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/rotary_male.stl"/>
+        </geometry>
+        <xacro:red_material/>
+      </visual>
+    <collision>
+      <origin xyz="0 0 ${-male_length / 2.0}" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${male_r}" length="${male_length / 2.0}" />
+      </geometry>
+    </collision> 
+    <inertial>
+      <origin xyz="0 0 ${-male_length / 2.0}" rpy="0 0 0" />
+      <mass value="${rotary_mass_2}"/>
+      <inertia ixx="${rotary_mass_2 / 12.0 * (3 * male_r**2 + male_length**2)}" iyy="${rotary_mass_2 / 12.0 * (3 * male_r**2 + male_length**2)}" izz="${rotary_mass_2 / 2.0 * male_r**2}" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="rotary_module_joint" params="module">
+    <joint name="${module}__JOINT" type="revolute">
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${module}__OUTPUT_BODY"/>
+      <origin xyz="0 0 ${-input_to_joint}" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <dynamics damping=".1" friction="0.2"/>
+      <limit effort="7.0" lower="-1.57" upper="1.57" velocity="2.208932"/>
+    </joint>
+
+    <transmission name="${module}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${module}__JOINT">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${module}__JOINT_motor">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>300</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+  </xacro:macro>
+
+  <xacro:macro name="rotary_module_out" params="module">
+    <link name="${module}__OUTPUT_BODY">
+      <visual>
+        <origin xyz="0 0 ${-joint_to_female_center}" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/rotary_female.stl"/>
+        </geometry>
+        <xacro:red_material/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-joint_to_female_center}" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="${female_r}" length="${female_length}" />
+        </geometry>
+      </collision> 
+      <inertial>
+        <origin xyz="0 0 ${-joint_to_female_center}" rpy="0 0 0" />
+        <mass value="${rotary_mass_2}"/>
+        <inertia ixx="${rotary_mass_2 / 12.0 * (3 * female_r**2 + female_length**2)}" iyy="${rotary_mass_2 / 12.0 * (3 * female_r**2 + female_length**2)}" izz="${rotary_mass_2 / 2.0 * female_r**2}" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="rotary_module_out_interface" params="module child offset">
+    <joint name="${module}__OUTPUT_INTERFACE" type="fixed">
+      <parent link="${module}__OUTPUT_BODY"/>
+      <child link="${child}__INPUT_INTERFACE"/>
+      <origin xyz="0 0 ${-joint_to_output}" rpy="0 0 ${offset}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="collar" params="module">
+    <link name="${module}__COLLAR">
+      <visual>
+        <origin xyz="0 0 ${-joint_to_output}" rpy="0 ${PI/2} 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/collar.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__COLLAR_JOINT" type="fixed">
+      <parent link="${module}__OUTPUT_BODY"/>
+      <child link="${module}__COLLAR"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="rotary_module" params="module child output_offset">
+    <xacro:rotary_module_in module="${module}"/>
+    <xacro:rotary_module_joint module="${module}" />
+    <xacro:rotary_module_out module="${module}" />
+    <xacro:rotary_module_out_interface module="${module}" child="${child}" offset="${output_offset}"/>
+    <xacro:collar module="${module}"/>
+  </xacro:macro>
+</robot>
+

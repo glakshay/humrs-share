@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="head_mass" value=".67" />
+  <xacro:property name="head_length" value="0.067576" />
+  <xacro:property name="head_radius" value="0.0263525" />
+
+  <xacro:macro name="head" params="module">
+    <link name="${module}">
+      <visual>
+        <origin xyz="0 0 ${-head_length / 2.0}" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="${head_radius}" length="${head_length}"/>
+        </geometry>
+        <xacro:white_material/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-head_length / 2.0}" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="${head_radius}" length="${head_length}" />
+        </geometry>
+      </collision> 
+      <inertial>
+        <origin xyz="0 0 ${-head_length / 2.0}" rpy="0 0 0" />
+        <mass value="${head_mass}"/>
+        <inertia ixx="${head_mass / 12.0 * (3 * head_radius**2 + head_length**2)}" iyy="${head_mass / 12.0 * (3 * head_radius**2 + head_length**2)}" izz="${head_mass / 2.0 * head_radius**2}" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="head_collar" params="module">
+    <link name="${module}__COLLAR">
+      <visual>
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/collar.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__COLLAR_JOINT" type="fixed">
+      <origin xyz="0 0 ${-head_length}" rpy="0 ${-PI/2} 0" />
+      <parent link="${module}"/>
+      <child link="${module}__COLLAR"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="head_out_interface" params="module child offset">
+    <joint name="${module}__OUTPUT_INTERFACE" type="fixed">
+      <parent link="${module}"/>
+      <child link="${child}__INPUT_INTERFACE"/>
+      <origin xyz="0 0 ${-head_length}" rpy="0 0 ${offset}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="head_module" params="module child output_offset">
+    <xacro:head module="${module}"/>
+    <xacro:head_out_interface module="${module}" child="${child}" offset="${output_offset}"/>
+    <xacro:head_collar module="${module}"/>
+  </xacro:macro>
+</robot>
+

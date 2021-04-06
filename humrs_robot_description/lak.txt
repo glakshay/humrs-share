@@ -1,0 +1,3 @@
+run the water file then upload.launch
+
+will spawn tr.dae

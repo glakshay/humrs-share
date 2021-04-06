@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="axial_mass" value=".67" />
+  <xacro:property name="axial_length" value="0.1155103" />
+  <xacro:property name="axial_radius" value="0.0432145" />
+  <xacro:property name="input_to_prop" value="0.068235"/>
+
+  <xacro:macro name="axial_body" params="module">
+    <link name="${module}__INPUT_INTERFACE">
+      <visual>
+        <origin xyz="0 0 ${-axial_length / 2.0}" rpy="${-PI/2} 0 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/axial_thruster_body.stl"/>
+        </geometry>
+        <xacro:blue_material/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-axial_length / 2.0}" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="${axial_radius}" length="${axial_length}" />
+        </geometry>
+      </collision> 
+      <inertial>
+        <origin xyz="0 0 ${-axial_length / 2.0}" rpy="0 0 0" />
+        <mass value="${axial_mass}"/>
+        <inertia ixx="${axial_mass / 12.0 * (3 * axial_radius**2 + axial_length**2)}" iyy="${axial_mass / 12.0 * (3 * axial_radius**2 + axial_length**2)}" izz="${axial_mass / 2.0 * axial_radius**2}" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="axial_propeller" params="module">
+    <link name="${module}_propeller">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${PI/2} 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/axial_propeller.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__PROP_JOINT" type="continuous">
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${module}_propeller"/>
+      <origin xyz="0 0 ${-input_to_prop}" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping=".1" friction="0.2"/>
+      <limit effort="7.0" velocity="20"/>
+    </joint>
+
+    <transmission name="${module}__PROP_JOINT_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${module}__PROP_JOINT">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${module}__PROP_JOINT_motor">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="axial_thruster" params="module">
+    <xacro:axial_body module="${module}"/>
+    <xacro:axial_propeller module="${module}"/>
+  </xacro:macro>
+</robot>
+

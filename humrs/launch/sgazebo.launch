@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <include file="$(find uuv_gazebo_worlds)/launch/empty_underwater_world.launch">
+    <arg name="paused" value="true"/>
+   </include>
+
+  <param name="robot_description" textfile="$(find humrs)/urdf/snake.urdf"/>
+  <node
+    name="spawn_model"
+    pkg="gazebo_ros"
+    type="spawn_model"
+    args="-file $(find humrs)/urdf/snake.urdf -urdf -x 0.2 -y 0.2 -z 0 -P 1.5708 -model humrs"
+    output="screen" />
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true">
+  </node>
+
+
+
+</launch>

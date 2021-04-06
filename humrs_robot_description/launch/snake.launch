@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+
+  <param name="robot_description" textfile="$(find humrs_robot_description)/urdf/snake.urdf"/>
+  <node
+    name="spawn_model"
+    pkg="gazebo_ros"
+    type="spawn_model"
+    args="-file $(find humrs_robot_description)/urdf/snake.urdf -urdf -x 0.2 -y 0.2 -z 0 -P 1.5708 -model humrs_robot_description"
+    output="screen" />
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true">
+  </node>
+
+
+
+</launch>

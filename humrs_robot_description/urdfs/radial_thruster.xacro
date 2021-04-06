@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="radial_mass" value=".67" />
+  <xacro:property name="radial_length" value="0.0600703" />
+  <xacro:property name="radial_radius" value="0.0253925" />
+  <xacro:property name="input_to_propv" value="0.022426"/>
+  <xacro:property name="input_to_proph" value="0.0432259"/>
+
+  <xacro:macro name="radial_body" params="module">
+    <link name="${module}__INPUT_INTERFACE">
+      <visual>
+        <origin xyz="0 0 ${-radial_length / 2.0}" rpy="${-PI/2} 0 0" />
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/radial_thruster_body.stl"/>
+        </geometry>
+        <xacro:blue_material/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-radial_length / 2.0}" rpy="0 0 0" />
+        <geometry>
+          <cylinder radius="${radial_radius}" length="${radial_length}" />
+        </geometry>
+      </collision> 
+      <inertial>
+        <origin xyz="0 0 ${-radial_length / 2.0}" rpy="0 0 0" />
+        <mass value="${radial_mass}"/>
+        <inertia ixx="${radial_mass / 12.0 * (3 * radial_radius**2 + radial_length**2)}" iyy="${radial_mass / 12.0 * (3 * radial_radius**2 + radial_length**2)}" izz="${radial_mass / 2.0 * radial_radius**2}" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <xacro:macro name="radial_collar" params="module">
+    <link name="${module}__COLLAR">
+      <visual>
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/collar.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__COLLAR_JOINT" type="fixed">
+      <origin xyz="0 0 ${-radial_length}" rpy="0 ${-PI/2} 0" />
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${module}__COLLAR"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="radial_module_out_interface" params="module child offset">
+    <joint name="${module}__OUTPUT_INTERFACE" type="fixed">
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${child}__INPUT_INTERFACE"/>
+      <origin xyz="0 0 ${-radial_length}" rpy="0 0 ${offset}"/>
+    </joint>
+  </xacro:macro>
+  
+  <xacro:macro name="vertical_propeller" params="module">
+    <link name="${module}_propeller_v">
+      <visual>
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/radial_propeller_v.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__PROPV_JOINT" type="continuous">
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${module}_propeller_v"/>
+      <origin xyz="0 0 ${-input_to_propv}" rpy="${PI/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping=".1" friction="0.2"/>
+      <limit effort="7.0" velocity="20"/>
+    </joint>
+
+    <transmission name="${module}__PROPV_JOINT_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${module}__PROPV_JOINT">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${module}__PROPV_JOINT_motor">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="horizontal_propeller" params="module">
+    <link name="${module}_propeller_h">
+      <visual>
+        <geometry>
+          <mesh filename="package://humrs_robot_description/meshes/radial_propeller_h.stl"/>
+        </geometry>
+        <xacro:black_material/>
+      </visual>
+    </link>
+    <joint name="${module}__PROPH_JOINT" type="continuous">
+      <parent link="${module}__INPUT_INTERFACE"/>
+      <child link="${module}_propeller_h"/>
+      <origin xyz="0 0 ${-input_to_proph}" rpy="0 ${PI/2} 0"/>
+      <axis xyz="0 0 1"/>
+      <dynamics damping=".1" friction="0.2"/>
+      <limit effort="7.0" velocity="20"/>
+    </joint>
+
+    <transmission name="${module}__PROPH_JOINT_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${module}__PROPH_JOINT">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${module}__PROPH_JOINT_motor">
+        <hardwareInterface>PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <xacro:macro name="radial_thruster" params="module child output_offset">
+    <xacro:radial_body module="${module}"/>
+    <xacro:horizontal_propeller module="${module}"/>
+    <xacro:vertical_propeller module="${module}"/>
+    <xacro:radial_collar module="${module}"/>
+    <xacro:radial_module_out_interface module="${module}" child="${child}" offset="${output_offset}"/>
+  </xacro:macro>
+</robot>
+
+
